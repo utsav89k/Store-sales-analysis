@@ -1,0 +1,41 @@
+{
+  "name" : "Product Transform",
+  "jobMode" : "VISUAL",
+  "description" : "",
+  "role" : "arn:aws:iam::979437020390:role/glue_projectRole",
+  "executionProperty" : {
+    "maxConcurrentRuns" : 1
+  },
+  "command" : {
+    "name" : "glueetl",
+    "scriptLocation" : "s3://aws-glue-assets-979437020390-us-east-1/scripts/Product Transform.py",
+    "pythonVersion" : "3"
+  },
+  "defaultArguments" : {
+    "--enable-metrics" : "true",
+    "--enable-spark-ui" : "true",
+    "--spark-event-logs-path" : "s3://aws-glue-assets-979437020390-us-east-1/sparkHistoryLogs/",
+    "--enable-job-insights" : "true",
+    "--enable-observability-metrics" : "true",
+    "--conf" : "spark.eventLog.rolling.enabled=true",
+    "--enable-glue-datacatalog" : "true",
+    "--job-bookmark-option" : "job-bookmark-disable",
+    "--job-language" : "python",
+    "--TempDir" : "s3://aws-glue-assets-979437020390-us-east-1/temporary/"
+  },
+  "maxRetries" : 0,
+  "allocatedCapacity" : 10,
+  "timeout" : 480,
+  "maxCapacity" : 10.0,
+  "glueVersion" : "5.0",
+  "numberOfWorkers" : 10,
+  "workerType" : "G.1X",
+  "executionClass" : "STANDARD",
+  "codeGenConfigurationNodes" : "{\"node-1773535790306\":{\"SelectFromCollection\":{\"Index\":0,\"Inputs\":[\"node-1773535463449\"],\"Name\":\"Select From Collection\"}},\"node-1773535358431\":{\"DropDuplicates\":{\"Columns\":[[\"productkey\"]],\"Inputs\":[\"node-1773535312831\"],\"Name\":\"Drop Duplicates\"}},\"node-1773535796293\":{\"S3GlueParquetTarget\":{\"AutoDataQuality\":{\"EvaluationContext\":\"EvaluateDataQuality_node1773535274677\",\"IsEnabled\":true},\"Compression\":\"snappy\",\"Inputs\":[\"node-1773535790306\"],\"Name\":\"Amazon S3\",\"NumberTargetPartitions\":\"0\",\"PartitionKeys\":[],\"Path\":\"s3://powerbi-glue-buckett/silver/product/\",\"SchemaChangePolicy\":{\"EnableUpdateCatalog\":false}}},\"node-1773535463449\":{\"CustomCode\":{\"ClassName\":\"MyTransform\",\"Code\":\"from awsglue.dynamicframe import DynamicFrame, DynamicFrameCollection\\nfrom pyspark.sql.functions import col, split\\n\\ndyf = dfc.select(list(dfc.keys())[0])\\ndf = dyf.toDF()\\n\\n# SKU Category (text before first \\\"-\\\")\\ndf = df.withColumn(\\n    \\\"SKU Category\\\",\\n    split(col(\\\"ProductSKU\\\"), \\\"-\\\").getItem(0)\\n)\\n\\n# SKU Type (text after first \\\"-\\\")\\ndf = df.withColumn(\\n    \\\"SKU Type\\\",\\n    split(col(\\\"ProductSKU\\\"), \\\"-\\\").getItem(1)\\n)\\n\\n# Discount Price (90% of product price)\\ndf = df.withColumn(\\n    \\\"Discount Price\\\",\\n    col(\\\"ProductPrice\\\") * 0.9\\n)\\n\\nnew_dyf = DynamicFrame.fromDF(df, glueContext, \\\"new_dyf\\\")\\n\\nreturn DynamicFrameCollection({\\\"output\\\": new_dyf}, glueContext)\",\"Inputs\":[\"node-1773535396828\"],\"Name\":\"Custom Transform\",\"OutputSchemas\":[{\"Columns\":[{\"Name\":\"ProductKey\",\"Type\":\"int\"},{\"Name\":\"ProductSubcategoryKey\",\"Type\":\"int\"},{\"Name\":\"ProductSKU\",\"Type\":\"string\"},{\"Name\":\"ProductName\",\"Type\":\"string\"},{\"Name\":\"ModelName\",\"Type\":\"string\"},{\"Name\":\"ProductDescription\",\"Type\":\"string\"},{\"Name\":\"ProductColor\",\"Type\":\"string\"},{\"Name\":\"ProductSize\",\"Type\":\"string\"},{\"Name\":\"ProductStyle\",\"Type\":\"string\"},{\"Name\":\"ProductCost\",\"Type\":\"float\"},{\"Name\":\"ProductPrice\",\"Type\":\"float\"},{\"Name\":\"SKU Category\",\"Type\":\"string\"},{\"Name\":\"SKU Type\",\"Type\":\"string\"},{\"Name\":\"Discount Price\",\"Type\":\"double\"}]}]}},\"node-1773535396828\":{\"ApplyMapping\":{\"Inputs\":[\"node-1773535358431\"],\"Mapping\":[{\"Dropped\":false,\"FromPath\":[\"ProductKey\"],\"FromType\":\"string\",\"ToKey\":\"ProductKey\",\"ToType\":\"int\"},{\"Dropped\":false,\"FromPath\":[\"ProductSubcategoryKey\"],\"FromType\":\"string\",\"ToKey\":\"ProductSubcategoryKey\",\"ToType\":\"int\"},{\"Dropped\":false,\"FromPath\":[\"ProductSKU\"],\"FromType\":\"string\",\"ToKey\":\"ProductSKU\",\"ToType\":\"string\"},{\"Dropped\":false,\"FromPath\":[\"ProductName\"],\"FromType\":\"string\",\"ToKey\":\"ProductName\",\"ToType\":\"string\"},{\"Dropped\":false,\"FromPath\":[\"ModelName\"],\"FromType\":\"string\",\"ToKey\":\"ModelName\",\"ToType\":\"string\"},{\"Dropped\":false,\"FromPath\":[\"ProductDescription\"],\"FromType\":\"string\",\"ToKey\":\"ProductDescription\",\"ToType\":\"string\"},{\"Dropped\":false,\"FromPath\":[\"ProductColor\"],\"FromType\":\"string\",\"ToKey\":\"ProductColor\",\"ToType\":\"string\"},{\"Dropped\":false,\"FromPath\":[\"ProductSize\"],\"FromType\":\"string\",\"ToKey\":\"ProductSize\",\"ToType\":\"string\"},{\"Dropped\":false,\"FromPath\":[\"ProductStyle\"],\"FromType\":\"string\",\"ToKey\":\"ProductStyle\",\"ToType\":\"string\"},{\"Dropped\":false,\"FromPath\":[\"ProductCost\"],\"FromType\":\"string\",\"ToKey\":\"ProductCost\",\"ToType\":\"float\"},{\"Dropped\":false,\"FromPath\":[\"ProductPrice\"],\"FromType\":\"string\",\"ToKey\":\"ProductPrice\",\"ToType\":\"float\"}],\"Name\":\"Change Schema\"}},\"node-1773535312831\":{\"S3ParquetSource\":{\"AdditionalOptions\":{\"EnableSamplePath\":false,\"SamplePath\":\"s3://powerbi-glue-buckett/bronze/Product/run-1773529404779-part-block-0-r-00000-snappy.parquet\"},\"Exclusions\":[],\"Name\":\"Amazon S3\",\"OutputSchemas\":[{\"Columns\":[{\"Name\":\"productkey\",\"Type\":\"string\"},{\"Name\":\"productsubcategorykey\",\"Type\":\"string\"},{\"Name\":\"productsku\",\"Type\":\"string\"},{\"Name\":\"productname\",\"Type\":\"string\"},{\"Name\":\"modelname\",\"Type\":\"string\"},{\"Name\":\"productdescription\",\"Type\":\"string\"},{\"Name\":\"productcolor\",\"Type\":\"string\"},{\"Name\":\"productsize\",\"Type\":\"string\"},{\"Name\":\"productstyle\",\"Type\":\"string\"},{\"Name\":\"productcost\",\"Type\":\"string\"},{\"Name\":\"productprice\",\"Type\":\"string\"}]}],\"Paths\":[\"s3://powerbi-glue-buckett/bronze/Product/\"],\"Recurse\":true}}}",
+  "sourceControlDetails" : {
+    "provider" : "GITHUB",
+    "repository" : "Store-sales-analysis",
+    "branch" : "aws_glue_branch",
+    "folder" : "Tranformations"
+  }
+}

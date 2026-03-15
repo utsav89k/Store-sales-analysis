@@ -1,0 +1,41 @@
+{
+  "name" : "Territory Transform",
+  "jobMode" : "VISUAL",
+  "description" : "",
+  "role" : "arn:aws:iam::979437020390:role/glue_projectRole",
+  "executionProperty" : {
+    "maxConcurrentRuns" : 1
+  },
+  "command" : {
+    "name" : "glueetl",
+    "scriptLocation" : "s3://aws-glue-assets-979437020390-us-east-1/scripts/Territory Transform.py",
+    "pythonVersion" : "3"
+  },
+  "defaultArguments" : {
+    "--enable-metrics" : "true",
+    "--enable-spark-ui" : "true",
+    "--spark-event-logs-path" : "s3://aws-glue-assets-979437020390-us-east-1/sparkHistoryLogs/",
+    "--enable-job-insights" : "true",
+    "--enable-observability-metrics" : "true",
+    "--conf" : "spark.eventLog.rolling.enabled=true",
+    "--enable-glue-datacatalog" : "true",
+    "--job-bookmark-option" : "job-bookmark-disable",
+    "--job-language" : "python",
+    "--TempDir" : "s3://aws-glue-assets-979437020390-us-east-1/temporary/"
+  },
+  "maxRetries" : 0,
+  "allocatedCapacity" : 2,
+  "timeout" : 480,
+  "maxCapacity" : 2.0,
+  "glueVersion" : "5.0",
+  "numberOfWorkers" : 2,
+  "workerType" : "G.1X",
+  "executionClass" : "STANDARD",
+  "codeGenConfigurationNodes" : "{\"node-1773535010439\":{\"S3ParquetSource\":{\"AdditionalOptions\":{\"EnableSamplePath\":false,\"SamplePath\":\"s3://powerbi-glue-buckett/bronze/Territory/run-1773529404396-part-block-0-r-00000-snappy.parquet\"},\"Exclusions\":[],\"Name\":\"Amazon S3\",\"OutputSchemas\":[{\"Columns\":[{\"Name\":\"salesterritorykey\",\"Type\":\"string\"},{\"Name\":\"region\",\"Type\":\"string\"},{\"Name\":\"country\",\"Type\":\"string\"},{\"Name\":\"continent\",\"Type\":\"string\"}]}],\"Paths\":[\"s3://powerbi-glue-buckett/bronze/Territory/\"],\"Recurse\":true}},\"node-1773535041018\":{\"ApplyMapping\":{\"Inputs\":[\"node-1773535038458\"],\"Mapping\":[{\"Dropped\":false,\"FromPath\":[\"salesterritorykey\"],\"FromType\":\"string\",\"ToKey\":\"salesterritorykey\",\"ToType\":\"int\"},{\"Dropped\":false,\"FromPath\":[\"region\"],\"FromType\":\"string\",\"ToKey\":\"region\",\"ToType\":\"string\"},{\"Dropped\":false,\"FromPath\":[\"country\"],\"FromType\":\"string\",\"ToKey\":\"country\",\"ToType\":\"string\"},{\"Dropped\":false,\"FromPath\":[\"continent\"],\"FromType\":\"string\",\"ToKey\":\"continent\",\"ToType\":\"string\"}],\"Name\":\"Change Schema\"}},\"node-1773535050734\":{\"S3GlueParquetTarget\":{\"AutoDataQuality\":{\"EvaluationContext\":\"EvaluateDataQuality_node1773534928918\",\"IsEnabled\":true},\"Compression\":\"snappy\",\"Inputs\":[\"node-1773535041018\"],\"Name\":\"Amazon S3\",\"NumberTargetPartitions\":\"0\",\"PartitionKeys\":[],\"Path\":\"s3://powerbi-glue-buckett/silver/territory/\",\"SchemaChangePolicy\":{\"EnableUpdateCatalog\":false}}},\"node-1773535038458\":{\"DropDuplicates\":{\"Columns\":[],\"Inputs\":[\"node-1773535010439\"],\"Name\":\"Drop Duplicates\"}}}",
+  "sourceControlDetails" : {
+    "provider" : "GITHUB",
+    "repository" : "Store-sales-analysis",
+    "branch" : "aws_glue_branch",
+    "folder" : "Tranformations"
+  }
+}

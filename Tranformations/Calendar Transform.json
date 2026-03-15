@@ -1,0 +1,41 @@
+{
+  "name" : "Calendar Transform",
+  "jobMode" : "VISUAL",
+  "description" : "Transforming and Adding the Columns in Calendar Lookup Table",
+  "role" : "arn:aws:iam::979437020390:role/glue_projectRole",
+  "executionProperty" : {
+    "maxConcurrentRuns" : 1
+  },
+  "command" : {
+    "name" : "glueetl",
+    "scriptLocation" : "s3://aws-glue-assets-979437020390-us-east-1/scripts/Calendar Transform.py",
+    "pythonVersion" : "3"
+  },
+  "defaultArguments" : {
+    "--enable-metrics" : "true",
+    "--enable-spark-ui" : "true",
+    "--spark-event-logs-path" : "s3://aws-glue-assets-979437020390-us-east-1/sparkHistoryLogs/",
+    "--enable-job-insights" : "true",
+    "--enable-observability-metrics" : "true",
+    "--conf" : "spark.eventLog.rolling.enabled=true",
+    "--enable-glue-datacatalog" : "true",
+    "--job-bookmark-option" : "job-bookmark-disable",
+    "--job-language" : "python",
+    "--TempDir" : "s3://aws-glue-assets-979437020390-us-east-1/temporary/"
+  },
+  "maxRetries" : 0,
+  "allocatedCapacity" : 2,
+  "timeout" : 480,
+  "maxCapacity" : 2.0,
+  "glueVersion" : "5.0",
+  "numberOfWorkers" : 2,
+  "workerType" : "G.1X",
+  "executionClass" : "STANDARD",
+  "codeGenConfigurationNodes" : "{\"node-1773531154833\":{\"DropNullFields\":{\"Inputs\":[\"node-1773531134653\"],\"Name\":\"Drop Null Fields\",\"NullCheckBoxList\":{\"IsEmpty\":false,\"IsNegOne\":false},\"NullTextList\":[]}},\"node-1773531134653\":{\"DropDuplicates\":{\"Columns\":[],\"Inputs\":[\"node-1773531107394\"],\"Name\":\"Drop Duplicates\"}},\"node-1773531107394\":{\"S3ParquetSource\":{\"AdditionalOptions\":{\"EnableSamplePath\":false,\"SamplePath\":\"s3://powerbi-glue-buckett/bronze/Calendar/run-1773529393213-part-block-0-r-00000-snappy.parquet\"},\"Exclusions\":[],\"Name\":\"Calendar Source\",\"OutputSchemas\":[{\"Columns\":[{\"Name\":\"date\",\"Type\":\"string\"}]}],\"Paths\":[\"s3://powerbi-glue-buckett/bronze/Calendar/\"],\"Recurse\":true}},\"node-1773531175921\":{\"ApplyMapping\":{\"Inputs\":[\"node-1773531154833\"],\"Mapping\":[{\"Dropped\":false,\"FromPath\":[\"date\"],\"FromType\":\"string\",\"ToKey\":\"date\",\"ToType\":\"string\"}],\"Name\":\"Change Schema\"}},\"node-1773532215440\":{\"SelectFromCollection\":{\"Index\":0,\"Inputs\":[\"node-1773531670095\"],\"Name\":\"Select From Collection\"}},\"node-1773532196517\":{\"S3GlueParquetTarget\":{\"AutoDataQuality\":{\"EvaluationContext\":\"EvaluateDataQuality_node1773530968644\",\"IsEnabled\":true},\"Compression\":\"snappy\",\"Inputs\":[\"node-1773532215440\"],\"Name\":\"Amazon S3\",\"NumberTargetPartitions\":\"0\",\"PartitionKeys\":[],\"Path\":\"s3://powerbi-glue-buckett/silver/calendar/\",\"SchemaChangePolicy\":{\"EnableUpdateCatalog\":false}}},\"node-1773531670095\":{\"CustomCode\":{\"ClassName\":\"MyTransform\",\"Code\":\"from awsglue.dynamicframe import DynamicFrame, DynamicFrameCollection\\nfrom pyspark.sql.functions import col, to_date, date_format, date_trunc, trunc, month, year, dayofweek, when\\n\\n# Get input dynamic frame\\ndyf = dfc.select(list(dfc.keys())[0])\\n\\n# Convert to DataFrame\\ndf = dyf.toDF()\\n\\n# Ensure calendar column is date\\ndf = df.withColumn(\\\"Date\\\", to_date(col(\\\"Date\\\")))\\n\\ndf = df \\\\\\n    .withColumn(\\\"Day Name\\\", date_format(col(\\\"Date\\\"), \\\"EEEE\\\")) \\\\\\n    .withColumn(\\\"Start of Week\\\", date_trunc(\\\"week\\\", col(\\\"Date\\\")).cast(\\\"date\\\")) \\\\\\n    .withColumn(\\\"Start of Month\\\", trunc(col(\\\"Date\\\"), \\\"month\\\")) \\\\\\n    .withColumn(\\\"Start of Quarter\\\", date_trunc(\\\"quarter\\\", col(\\\"Date\\\")).cast(\\\"date\\\")) \\\\\\n    .withColumn(\\\"Month Name\\\", date_format(col(\\\"Date\\\"), \\\"MMMM\\\")) \\\\\\n    .withColumn(\\\"Month\\\", month(col(\\\"Date\\\"))) \\\\\\n    .withColumn(\\\"Start of Year\\\", trunc(col(\\\"Date\\\"), \\\"year\\\")) \\\\\\n    .withColumn(\\\"Year\\\", year(col(\\\"Date\\\"))) \\\\\\n    .withColumn(\\\"Month Short\\\", date_format(col(\\\"Date\\\"), \\\"MMM\\\")) \\\\\\n    .withColumn(\\\"Day of Week\\\", dayofweek(col(\\\"Date\\\"))) \\\\\\n    .withColumn(\\\"Weekend\\\", when(dayofweek(col(\\\"Date\\\")).isin(1,7), \\\"Yes\\\").otherwise(\\\"No\\\"))\\n\\n# Convert back to DynamicFrame\\nnew_dyf = DynamicFrame.fromDF(df, glueContext, \\\"new_dyf\\\")\\n\\nreturn DynamicFrameCollection({\\\"output\\\": new_dyf}, glueContext)\",\"Inputs\":[\"node-1773531175921\"],\"Name\":\"Custom Transform\",\"OutputSchemas\":[{\"Columns\":[{\"Name\":\"Date\",\"Type\":\"date\"},{\"Name\":\"Day Name\",\"Type\":\"string\"},{\"Name\":\"Start of Week\",\"Type\":\"date\"},{\"Name\":\"Start of Month\",\"Type\":\"date\"},{\"Name\":\"Start of Quarter\",\"Type\":\"date\"},{\"Name\":\"Month Name\",\"Type\":\"string\"},{\"Name\":\"Month\",\"Type\":\"int\"},{\"Name\":\"Start of Year\",\"Type\":\"date\"},{\"Name\":\"Year\",\"Type\":\"int\"},{\"Name\":\"Month Short\",\"Type\":\"string\"},{\"Name\":\"Day of Week\",\"Type\":\"int\"},{\"Name\":\"Weekend\",\"Type\":\"string\"}]}]}}}",
+  "sourceControlDetails" : {
+    "provider" : "GITHUB",
+    "repository" : "Store-sales-analysis",
+    "branch" : "aws_glue_branch",
+    "folder" : "Tranformations"
+  }
+}

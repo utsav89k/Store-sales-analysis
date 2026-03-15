@@ -1,0 +1,41 @@
+{
+  "name" : "Sales Transform",
+  "jobMode" : "VISUAL",
+  "description" : "",
+  "role" : "arn:aws:iam::979437020390:role/glue_projectRole",
+  "executionProperty" : {
+    "maxConcurrentRuns" : 1
+  },
+  "command" : {
+    "name" : "glueetl",
+    "scriptLocation" : "s3://aws-glue-assets-979437020390-us-east-1/scripts/Sales Transform.py",
+    "pythonVersion" : "3"
+  },
+  "defaultArguments" : {
+    "--enable-metrics" : "true",
+    "--enable-spark-ui" : "true",
+    "--spark-event-logs-path" : "s3://aws-glue-assets-979437020390-us-east-1/sparkHistoryLogs/",
+    "--enable-job-insights" : "true",
+    "--enable-observability-metrics" : "true",
+    "--conf" : "spark.eventLog.rolling.enabled=true",
+    "--enable-glue-datacatalog" : "true",
+    "--job-bookmark-option" : "job-bookmark-disable",
+    "--job-language" : "python",
+    "--TempDir" : "s3://aws-glue-assets-979437020390-us-east-1/temporary/"
+  },
+  "maxRetries" : 0,
+  "allocatedCapacity" : 2,
+  "timeout" : 480,
+  "maxCapacity" : 2.0,
+  "glueVersion" : "5.0",
+  "numberOfWorkers" : 2,
+  "workerType" : "G.1X",
+  "executionClass" : "STANDARD",
+  "codeGenConfigurationNodes" : "{\"node-1773534523141\":{\"S3GlueParquetTarget\":{\"AutoDataQuality\":{\"EvaluationContext\":\"EvaluateDataQuality_node1773533390015\",\"IsEnabled\":true},\"Compression\":\"snappy\",\"Inputs\":[\"node-1773534514932\"],\"Name\":\"Amazon S3\",\"NumberTargetPartitions\":\"0\",\"PartitionKeys\":[],\"Path\":\"s3://powerbi-glue-buckett/silver/sales/\",\"SchemaChangePolicy\":{\"EnableUpdateCatalog\":false}}},\"node-1773534227241\":{\"DropNullFields\":{\"Inputs\":[\"node-1773534098500\"],\"Name\":\"Drop Null Fields\",\"NullCheckBoxList\":{\"IsEmpty\":true,\"IsNegOne\":false},\"NullTextList\":[]}},\"node-1773534098500\":{\"S3ParquetSource\":{\"AdditionalOptions\":{\"EnableSamplePath\":false,\"SamplePath\":\"s3://powerbi-glue-buckett/bronze/Sales/run-1773529405250-part-block-0-r-00000-snappy.parquet\"},\"Exclusions\":[],\"Name\":\"Amazon S3\",\"OutputSchemas\":[{\"Columns\":[{\"Name\":\"orderdate\",\"Type\":\"string\"},{\"Name\":\"stockdate\",\"Type\":\"string\"},{\"Name\":\"ordernumber\",\"Type\":\"string\"},{\"Name\":\"productkey\",\"Type\":\"string\"},{\"Name\":\"customerkey\",\"Type\":\"string\"},{\"Name\":\"territorykey\",\"Type\":\"string\"},{\"Name\":\"orderlineitem\",\"Type\":\"string\"},{\"Name\":\"orderquantity\",\"Type\":\"string\"}]}],\"Paths\":[\"s3://powerbi-glue-buckett/bronze/Sales/\"],\"Recurse\":true}},\"node-1773534361993\":{\"CustomCode\":{\"ClassName\":\"MyTransform\",\"Code\":\"from awsglue.dynamicframe import DynamicFrame, DynamicFrameCollection\\nfrom pyspark.sql.functions import col, when\\n\\n# Get input DynamicFrame\\ndyf = dfc.select(list(dfc.keys())[0])\\n\\n# Convert to DataFrame\\ndf = dyf.toDF()\\n\\n# Create quality_type column\\ndf = df.withColumn(\\n    \\\"Quality Type\\\",\\n    when(col(\\\"OrderQuantity\\\") == 1, \\\"Single Item\\\")\\n    .when(col(\\\"OrderQuantity\\\") > 1, \\\"Multiple Item\\\")\\n)\\n\\n# Convert back to DynamicFrame\\nnew_dyf = DynamicFrame.fromDF(df, glueContext, \\\"new_dyf\\\")\\n\\nreturn DynamicFrameCollection({\\\"output\\\": new_dyf}, glueContext)\",\"Inputs\":[\"node-1773534272677\"],\"Name\":\"Custom Transform\",\"OutputSchemas\":[{\"Columns\":[{\"Name\":\"OrderDate\",\"Type\":\"date\"},{\"Name\":\"StockDate\",\"Type\":\"date\"},{\"Name\":\"OrderNumber\",\"Type\":\"string\"},{\"Name\":\"ProductKey\",\"Type\":\"int\"},{\"Name\":\"CustomerKey\",\"Type\":\"int\"},{\"Name\":\"TerritoryKey\",\"Type\":\"int\"},{\"Name\":\"OrderLineItem\",\"Type\":\"int\"},{\"Name\":\"OrderQuantity\",\"Type\":\"int\"},{\"Name\":\"Quality Type\",\"Type\":\"string\"}]}]}},\"node-1773534514932\":{\"SelectFromCollection\":{\"Index\":0,\"Inputs\":[\"node-1773534361993\"],\"Name\":\"Select From Collection\"}},\"node-1773534272677\":{\"ApplyMapping\":{\"Inputs\":[\"node-1773534227241\"],\"Mapping\":[{\"Dropped\":false,\"FromPath\":[\"OrderDate\"],\"FromType\":\"string\",\"ToKey\":\"OrderDate\",\"ToType\":\"date\"},{\"Dropped\":false,\"FromPath\":[\"StockDate\"],\"FromType\":\"string\",\"ToKey\":\"StockDate\",\"ToType\":\"date\"},{\"Dropped\":false,\"FromPath\":[\"OrderNumber\"],\"FromType\":\"string\",\"ToKey\":\"OrderNumber\",\"ToType\":\"string\"},{\"Dropped\":false,\"FromPath\":[\"ProductKey\"],\"FromType\":\"string\",\"ToKey\":\"ProductKey\",\"ToType\":\"int\"},{\"Dropped\":false,\"FromPath\":[\"CustomerKey\"],\"FromType\":\"string\",\"ToKey\":\"CustomerKey\",\"ToType\":\"int\"},{\"Dropped\":false,\"FromPath\":[\"TerritoryKey\"],\"FromType\":\"string\",\"ToKey\":\"TerritoryKey\",\"ToType\":\"int\"},{\"Dropped\":false,\"FromPath\":[\"OrderLineItem\"],\"FromType\":\"string\",\"ToKey\":\"OrderLineItem\",\"ToType\":\"int\"},{\"Dropped\":false,\"FromPath\":[\"OrderQuantity\"],\"FromType\":\"string\",\"ToKey\":\"OrderQuantity\",\"ToType\":\"int\"}],\"Name\":\"Change Schema\"}}}",
+  "sourceControlDetails" : {
+    "provider" : "GITHUB",
+    "repository" : "Store-sales-analysis",
+    "branch" : "aws_glue_branch",
+    "folder" : "Tranformations"
+  }
+}

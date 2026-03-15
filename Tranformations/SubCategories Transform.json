@@ -1,0 +1,41 @@
+{
+  "name" : "SubCategories Transform",
+  "jobMode" : "VISUAL",
+  "description" : "",
+  "role" : "arn:aws:iam::979437020390:role/glue_projectRole",
+  "executionProperty" : {
+    "maxConcurrentRuns" : 1
+  },
+  "command" : {
+    "name" : "glueetl",
+    "scriptLocation" : "s3://aws-glue-assets-979437020390-us-east-1/scripts/SubCategories Transform.py",
+    "pythonVersion" : "3"
+  },
+  "defaultArguments" : {
+    "--enable-metrics" : "true",
+    "--enable-spark-ui" : "true",
+    "--spark-event-logs-path" : "s3://aws-glue-assets-979437020390-us-east-1/sparkHistoryLogs/",
+    "--enable-job-insights" : "true",
+    "--enable-observability-metrics" : "true",
+    "--conf" : "spark.eventLog.rolling.enabled=true",
+    "--enable-glue-datacatalog" : "true",
+    "--job-bookmark-option" : "job-bookmark-disable",
+    "--job-language" : "python",
+    "--TempDir" : "s3://aws-glue-assets-979437020390-us-east-1/temporary/"
+  },
+  "maxRetries" : 0,
+  "allocatedCapacity" : 2,
+  "timeout" : 480,
+  "maxCapacity" : 2.0,
+  "glueVersion" : "5.0",
+  "numberOfWorkers" : 2,
+  "workerType" : "G.1X",
+  "executionClass" : "STANDARD",
+  "codeGenConfigurationNodes" : "{\"node-1773533188473\":{\"DropDuplicates\":{\"Columns\":[],\"Inputs\":[\"node-1773533154578\"],\"Name\":\"Drop Duplicates\"}},\"node-1773533194690\":{\"DropNullFields\":{\"Inputs\":[\"node-1773533188473\"],\"Name\":\"Drop Null Fields\",\"NullCheckBoxList\":{\"IsEmpty\":false,\"IsNegOne\":false},\"NullTextList\":[]}},\"node-1773533154578\":{\"S3ParquetSource\":{\"AdditionalOptions\":{\"EnableSamplePath\":false,\"SamplePath\":\"s3://powerbi-glue-buckett/bronze/Subcategories/run-1773529403871-part-block-0-r-00000-snappy.parquet\"},\"Exclusions\":[],\"Name\":\"SubCategories Source\",\"OutputSchemas\":[{\"Columns\":[{\"Name\":\"productsubcategorykey\",\"Type\":\"string\"},{\"Name\":\"subcategoryname\",\"Type\":\"string\"},{\"Name\":\"productcategorykey\",\"Type\":\"string\"}]}],\"Paths\":[\"s3://powerbi-glue-buckett/bronze/Subcategories/\"],\"Recurse\":true}},\"node-1773533205507\":{\"ApplyMapping\":{\"Inputs\":[\"node-1773533194690\"],\"Mapping\":[{\"Dropped\":false,\"FromPath\":[\"ProductSubcategoryKey\"],\"FromType\":\"string\",\"ToKey\":\"ProductSubcategoryKey\",\"ToType\":\"int\"},{\"Dropped\":false,\"FromPath\":[\"SubcategoryName\"],\"FromType\":\"string\",\"ToKey\":\"SubcategoryName\",\"ToType\":\"string\"},{\"Dropped\":false,\"FromPath\":[\"ProductCategoryKey\"],\"FromType\":\"string\",\"ToKey\":\"ProductCategoryKey\",\"ToType\":\"int\"}],\"Name\":\"Change Schema\"}},\"node-1773533222148\":{\"S3GlueParquetTarget\":{\"AutoDataQuality\":{\"EvaluationContext\":\"EvaluateDataQuality_node1773533081771\",\"IsEnabled\":true},\"Compression\":\"snappy\",\"Inputs\":[\"node-1773533205507\"],\"Name\":\"Target S3\",\"NumberTargetPartitions\":\"0\",\"PartitionKeys\":[],\"Path\":\"s3://powerbi-glue-buckett/silver/subcategory/\",\"SchemaChangePolicy\":{\"EnableUpdateCatalog\":false}}}}",
+  "sourceControlDetails" : {
+    "provider" : "GITHUB",
+    "repository" : "Store-sales-analysis",
+    "branch" : "aws_glue_branch",
+    "folder" : "Tranformations"
+  }
+}
